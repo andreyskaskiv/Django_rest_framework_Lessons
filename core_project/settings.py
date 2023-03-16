@@ -12,21 +12,39 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
+import environ
+
+env = environ.Env(
+    DEBUG=bool,
+    SECRET_KEY=str,
+    DOMAIN_NAME=str,
+
+    DATABASE_NAME=str,
+    DATABASE_USER=str,
+    DATABASE_PASSWORD=str,
+    DATABASE_HOST=str,
+    DATABASE_PORT=str,
+
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-16$^t!(6+$or1^jv_w=h$q3spsq%7uz3s)*=t@=$hft7s4*euf'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
+DOMAIN_NAME = env('DOMAIN_NAME')
 
 # Application definition
 
@@ -82,13 +100,13 @@ WSGI_APPLICATION = 'core_project.wsgi.application'
 # }
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "book_store_db",
-        "USER": "book_store_username",
-        "PASSWORD": "book_store_password",
-        "HOST": "localhost",
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
 
