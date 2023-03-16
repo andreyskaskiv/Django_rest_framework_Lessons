@@ -1,6 +1,9 @@
 <a name="top"></a>
 
-
+#### Stack:
+- Django==4.1.7
+- [Python](https://www.python.org/downloads/)
+- [PostgreSQL](https://www.postgresql.org/)
 
 
 
