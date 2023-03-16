@@ -5,7 +5,7 @@
 - [Python](https://www.python.org/downloads/)
 - [PostgreSQL](https://www.postgresql.org/)
 
-
+### Tutorial: <a href="Tutorial.md">click</a>
 
 1. Install packages:
    ```bash
