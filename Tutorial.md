@@ -89,6 +89,79 @@ DATABASES = {
    python manage.py startapp store
    ```
 
+2. Registration  app store:
+   ```
+   core_project/settings.py -> 
+   
+   INSTALLED_APPS = [
+      ....
+    'store',
+      ....
+   ]
+   ```
+
+3. Create models:
+   ```
+   store -> models.py
+   
+   Book
+   ```
+   ```
+   python manage.py makemigrations
+   python manage.py migrate
+   ``` 
+
+
+4. Registration in admin panel:
+   ```
+   store -> admin.py
+   
+   BookAdmin
+   ```
+
+5. Create serializers:
+   ```
+   store -> serializers.py
+   
+   BooksSerializer
+   ```
+
+6. Create Views:
+   ```
+   store -> views.py 
+   
+   class BookViewSet(ModelViewSet)
+   ```
+
+7. Add in core_project/urls
+   ```
+   core_project -> urls.py added urlpatterns
+   
+   router = SimpleRouter()
+
+   router.register(r'book', BookViewSet)
+
+   urlpatterns += router.urls
+   ```
+
+
+8. Test serializers
+```
+Book.objects.create(name='Test_book_1', price='500.00')
+Book.objects.create(name='Test_book_2', price='600.00')
+```
+
+[test serializers](http://127.0.0.1:8000/book/?format=json)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -96,7 +169,17 @@ DATABASES = {
 
 ---
 
-
+* pip install django-extensions
+   ```
+      INSTALLED_APPS = (
+          ...
+          'django_extensions',
+      )
+   ```
+  
+```
+python manage.py shell_plus
+```
 
 
 
