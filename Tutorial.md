@@ -91,7 +91,7 @@ DATABASES = {
 
 2. Registration  app store:
    ```
-   core_project/settings.py -> 
+   _django_rest_framework_lessons_/settings.py -> 
    
    INSTALLED_APPS = [
       ....
@@ -133,9 +133,9 @@ DATABASES = {
    class BookViewSet(ModelViewSet)
    ```
 
-7. Add in core_project/urls
+7. Add in _django_rest_framework_lessons_/urls
    ```
-   core_project -> urls.py added urlpatterns
+   _django_rest_framework_lessons_ -> urls.py added urlpatterns
    
    router = SimpleRouter()
 
@@ -153,8 +153,24 @@ Book.objects.create(name='Test_book_2', price='600.00')
 
 [test serializers](http://127.0.0.1:8000/book/?format=json)
 
+9. Create TestCase
 
-
+   ```
+   store/tests -> test_api.py
+   
+   BooksApiTestCase
+   ```
+   ```
+   url = reverse('book-list') - all
+   
+   url = reverse('book-detail') + pk - single
+   ```
+   
+   ```
+   store/tests -> test_serializers.py
+   
+   BookSerializerTestCase
+   ```
 
 
 
