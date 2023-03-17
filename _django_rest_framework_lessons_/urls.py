@@ -23,7 +23,6 @@ router = SimpleRouter()
 
 router.register(r'book', BookViewSet)
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
