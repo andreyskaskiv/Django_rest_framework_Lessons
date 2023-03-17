@@ -9,7 +9,7 @@ class BookAdmin(ModelAdmin):
     """How and what will be reflected in the admin panel"""
 
     list_display = ('name', 'price',)
-    fields = ('name', 'price', 'description',)
+    fields = ('name', 'price', 'author_name', 'description',)
     list_filter = ('price',)
     search_fields = ('name',)
     ordering = ('-name', '-price',)

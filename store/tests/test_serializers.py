@@ -5,22 +5,38 @@ from store.serializers import BooksSerializer
 
 
 class BookSerializerTestCase(TestCase):
+    def setUp(self):
+        self.book_1 = Book.objects.create(name='Test book 1', price=500,
+                                          author_name='Author 1', description='')
+        self.book_2 = Book.objects.create(name='Test book 2', price=777,
+                                          author_name='Author 5', description='')
+        self.book_3 = Book.objects.create(name='Test book Author 1', price=777,
+                                          author_name='Author 2', description='')
+
     def test_ok(self):
-        book_1 = Book.objects.create(name='Test_book_1', price='500.00', description='')
-        book_2 = Book.objects.create(name='Test_book_2', price='600.00', description='')
-        data = BooksSerializer([book_1, book_2], many=True).data
+        data = BooksSerializer([self.book_1, self.book_2, self.book_3], many=True).data
         expected_data = [
             {
-                'id': book_1.id,
-                'name': 'Test_book_1',
+                'id': self.book_1.id,
+                'name': 'Test book 1',
                 'price': '500.00',
+                'author_name': 'Author 1',
                 'description': '',
             },
             {
-                'id': book_2.id,
-                'name': 'Test_book_2',
-                'price': '600.00',
+                'id': self.book_2.id,
+                'name': 'Test book 2',
+                'price': '777.00',
+                'author_name': 'Author 5',
                 'description': '',
             },
+            {
+                'id': self.book_3.id,
+                'name': 'Test book Author 1',
+                'price': '777.00',
+                'author_name': 'Author 2',
+                'description': '',
+            },
+
         ]
         self.assertEqual(expected_data, data)
