@@ -10,9 +10,7 @@ $ pip freeze > requirements.txt
 1. Create <a href="#project">project</a>
 2. Create <a href="#Databases">Databases</a>
 3. Create <a href="#store">store</a>
-
-
-
+4. Create <a href="#OAuth">OAuth</a>
 
 
 
@@ -235,7 +233,7 @@ DATABASES = {
   {"id":7,"name":"Test_book_1","price":"500.00","author_name":"author_1","description":""}]
    ```
   
-12. Continued TestCase
+11. Continued TestCase
 
    ```
    store/tests -> test_api.py
@@ -249,55 +247,57 @@ DATABASES = {
    ```
 
 
+### 4. Create OAuth: <a name="OAuth"></a>
 
+* [Tutorial 4: Authentication & Permissions](https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/)
+* [Authentication](https://www.django-rest-framework.org/api-guide/authentication/)
+* [Python Social Auth, Django Framework](https://python-social-auth.readthedocs.io/en/latest/configuration/django.html)
+* [GitHub](https://python-social-auth.readthedocs.io/en/latest/backends/github.html)
 
+- authenticity = подлинность
+- authorization(permissions) = предоставление определённому лицу или группе лиц прав на выполнение определённых действий
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+1. added
+   ```
+   _django_rest_framework_lessons_/settings.py -> 
+    
+    INSTALLED_APPS = (
+        ...
+        'social_django',
+        ...
+    )
+     ```
+    ```
+    AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+    )
+    ```
+    ```
+    # GITHUB
+    SOCIAL_AUTH_JSONFIELD_ENABLED = True
+    SOCIAL_AUTH_GITHUB_KEY = env('SOCIAL_AUTH_GITHUB_KEY')
+    SOCIAL_AUTH_GITHUB_SECRET = env('SOCIAL_AUTH_GITHUB_SECRET')
+    ```
+   
+2. Add in _django_rest_framework_lessons_/urls
+   ```
+   _django_rest_framework_lessons_ -> urls.py added urlpatterns
+   
+    urlpatterns = patterns('',
+        ...
+        re_path('', include('social_django.urls', namespace='social')),
+        path('auth/', auth),
+        ...
+    )
+   ```
+3. Create Views:
+   ```
+   store -> views.py 
+   
+   def auth(request):
+      return render(request, 'oauth.html')
+   ```
 
 
 
