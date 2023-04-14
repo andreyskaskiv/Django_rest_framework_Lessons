@@ -41,6 +41,9 @@ psycopg2.errors.InsufficientPrivilege:
 - GRANT postgres TO book_store_username;
 
 ```shell
+sudo su - postgres
+psql
+
 \list
 
 \c book_store_db
