@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
 from store.models import Book
@@ -14,7 +15,8 @@ class BooksApiTestCase(APITestCase):
         self.user = User.objects.create(username='test_username')
 
         self.book_1 = Book.objects.create(name='Test book 1', price=500,
-                                          author_name='Author 1')
+                                          author_name='Author 1',
+                                          owner=self.user)
         self.book_2 = Book.objects.create(name='Test book 2', price=777,
                                           author_name='Author 5')
         self.book_3 = Book.objects.create(name='Test book Author 1', price=777,
@@ -69,6 +71,7 @@ class BooksApiTestCase(APITestCase):
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(4, Book.objects.all().count())
+        self.assertEqual(self.user, Book.objects.last().owner)
 
     def test_06_PUT_update(self):
         url = reverse('book-detail', args=(self.book_1.id,))
@@ -104,3 +107,69 @@ class BooksApiTestCase(APITestCase):
         serializer_data = BooksSerializer(self.book_1).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
+
+    def test_09_PUT_update_not_owner(self):
+        self.user_not_owner = User.objects.create(username='test_username_not_owner', )
+        url = reverse('book-detail', args=(self.book_1.id,))
+        data = {
+            "name": self.book_1.name,
+            "price": 69,
+            "author_name": self.book_1.author_name,
+            "description": self.book_1.description
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user_not_owner)
+        response = self.client.put(url, data=json_data,
+                                   content_type='application/json')
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual({'detail': ErrorDetail(string='You do not have permission to perform this action.',
+                                                code='permission_denied')}, response.data)
+        self.book_1.refresh_from_db()
+        self.assertEqual(500, self.book_1.price)
+
+    def test_10_PUT_update_not_owner_but_staff(self):
+        self.user_not_owner = User.objects.create(username='test_username_not_owner',
+                                                  is_staff=True)
+        url = reverse('book-detail', args=(self.book_1.id,))
+        data = {
+            "name": self.book_1.name,
+            "price": 69,
+            "author_name": self.book_1.author_name,
+            "description": self.book_1.description
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user_not_owner)
+        response = self.client.put(url, data=json_data,
+                                   content_type='application/json')
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.book_1.refresh_from_db()
+        self.assertEqual(69, self.book_1.price)
+
+    def test_11_DELETE_not_owner(self):
+        self.assertEqual(3, Book.objects.all().count())
+        self.user_not_owner = User.objects.create(username='test_username_not_owner', )
+        url = reverse('book-detail', args=(self.book_1.id,))
+
+        self.client.force_login(self.user_not_owner)
+        response = self.client.delete(url,
+                                      content_type='application/json')
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual({'detail': ErrorDetail(string='You do not have permission to perform this action.',
+                                                code='permission_denied')}, response.data)
+        self.assertEqual(3, Book.objects.all().count())
+
+    def test_12_DELETE_not_owner_but_staff(self):
+        self.assertEqual(3, Book.objects.all().count())
+        self.user_not_owner = User.objects.create(username='test_username_not_owner',
+                                                  is_staff=True)
+        url = reverse('book-detail', args=(self.book_1.id,))
+
+        self.client.force_login(self.user_not_owner)
+        response = self.client.delete(url,
+                                      content_type='application/json')
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(2, Book.objects.all().count())

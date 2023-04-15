@@ -12,6 +12,7 @@ $ pip freeze > requirements.txt
 3. Create <a href="#store">store</a>
 4. Create <a href="#oauth">OAuth</a>
 5.  <a href="#crud">CRUD</a>
+6. Create <a href="#permissions">Permissions</a>
 
 
 
@@ -367,8 +368,6 @@ csrftoken
     python manage.py test
    ```
 
-   ```
-   store/tests -> test_api.py
   
 * New test:
 
@@ -397,6 +396,100 @@ csrftoken
   
 'book-list' - no id  
 'book-detail' - have id
+
+
+### 6. Create Permissions: <a name="permissions"></a>
+
+Любой может открывать книги,  
+создавать может только тот, кто авторизован,  
+но изменять может только тот, кто создал.
+
+1. Models refactoring:
+   ```
+   store -> models.py
+   
+    class Book(models.Model):
+        ...
+        owner = models.ForeignKey(User, on_delete=models.SET_NULL,
+                          null=True)
+   ```
+
+2. migrate
+   ```
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+3. Create permissions:
+   ```
+   store -> permissions.py
+   
+   class IsOwnerOrStaffOrReadOnly(BasePermission):
+   ```
+
+4. Views refactoring:
+   ```
+   store -> views.py 
+   
+   class BookViewSet(ModelViewSet)
+        ...
+        permission_classes = [IsOwnerOrStaffOrReadOnly]
+        ...
+   
+   
+        def perform_create(self, serializer):
+            serializer.validated_data['owner'] = self.request.user
+            serializer.save()  
+   
+   ```
+
+5. Continued TestCase
+   ```pycon
+    python manage.py test
+   ```
+
+* addition test:
+
+    ```
+    store/tests -> test_api.py
+    
+    def test_05_POST_create(self):
+       ...
+       self.assertEqual(self.user, Book.objects.last().owner)
+    ```
+   
+    ```
+    store/tests -> test_api.py
+    
+    def setUp(self):
+       ... 
+       self.book_1 = Book.objects.create(name='Test book 1', price=500,
+                                  author_name='Author 1',
+                                  owner=self.user)
+       ... 
+    
+    ```
+
+* New test:
+
+    ```
+    store/tests -> test_api.py
+    
+    def test_09_PUT_update_not_owner(self):
+       ...      
+    
+    def test_10_PUT_update_not_owner_but_staff(self):
+       ...   
+
+    def test_11_DELETE_not_owner(self):
+       ...      
+    
+    def test_12_DELETE_not_owner_but_staff(self):
+       ...  
+  
+    ```
+
+
 
 
 
