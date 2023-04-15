@@ -11,6 +11,7 @@ $ pip freeze > requirements.txt
 2. Create <a href="#Databases">Databases</a>
 3. Create <a href="#store">store</a>
 4. Create <a href="#OAuth">OAuth</a>
+5.  <a href="#CRUD">CRUD</a>
 
 
 
@@ -296,11 +297,108 @@ DATABASES = {
    ```
 3. Create Views:
    ```
-   store -> views.py 
+   store -> views.py
    
    def auth(request):
       return render(request, 'oauth.html')
    ```
+    ```
+   store -> views.py
+   
+   class BookViewSet(ModelViewSet):
+      ...
+      permission_classes = [IsAuthenticated]
+      ...
+   ```
+
+
+### 5. CRUD <a name="CRUD"></a>
+Postman
+
+----------------------------
+* [GET http://127.0.0.1:8000/book/](http://127.0.0.1:8000/book/)
+![GET.png](img%2FCRUD%2FGET.png)
+
+----------------------------
+* [GET http://127.0.0.1:8000/book/6/](http://127.0.0.1:8000/book/6/)
+![GET_id.png](img%2FCRUD%2FGET_id.png)
+
+----------------------------
+csrftoken
+* [GET http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
+![csrftoken.png](img%2FCRUD%2Fcsrftoken.png)
+
+----------------------------
+* [POST http://127.0.0.1:8000/book/](http://127.0.0.1:8000/book/)
+![POST.png](img%2FCRUD%2FPOST.png)
+
+----------------------------
+* 201 Created
+![POST_1.png](img%2FCRUD%2FPOST_1.png)
+
+----------------------------
+* 400 Bad Request
+![POST_2.png](img%2FCRUD%2FPOST_2.png)
+
+----------------------------
+* [PUT http://127.0.0.1:8000/book/9/](http://127.0.0.1:8000/book/9/)
+![PUT.png](img%2FCRUD%2FPUT.png)
+
+----------------------------
+* [DELETE http://127.0.0.1:8000/book/9/](http://127.0.0.1:8000/book/9/)
+![DELETE.png](img%2FCRUD%2FDELETE.png)
+
+
+1. Refactor Views:
+
+    ```
+   store -> views.py
+   
+   class BookViewSet(ModelViewSet):
+      ...
+      permission_classes = [IsAuthenticatedOrReadOnly]
+      ...
+   ```
+
+2. Continued TestCase
+
+* Checking Previous Tests
+   ```pycon
+    python manage.py test
+   ```
+
+   ```
+   store/tests -> test_api.py
+  
+* New test:
+
+   ```
+   store/tests -> test_api.py
+   
+   def setUp(self):
+       self.user = User.objects.create(username='test_username')
+       ... 
+   ```
+   ```
+   store/tests -> test_api.py
+   
+   def test_05_POST_create(self):
+       ...      
+
+   def test_06_PUT_update(self):
+       ... 
+       
+   def test_07_DELETE(self):
+       ...          
+          
+   def test_08_get_id(self):
+       ...    
+   ```
+  
+'book-list' - no id  
+'book-detail' - have id
+
+
 
 
 
