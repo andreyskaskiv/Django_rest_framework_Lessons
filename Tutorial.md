@@ -8,10 +8,10 @@ $ pip freeze > requirements.txt
 <a name="top"></a>
 ### Tutorial
 1. Create <a href="#project">project</a>
-2. Create <a href="#Databases">Databases</a>
+2. Create <a href="#databases">Databases</a>
 3. Create <a href="#store">store</a>
-4. Create <a href="#OAuth">OAuth</a>
-5.  <a href="#CRUD">CRUD</a>
+4. Create <a href="#oauth">OAuth</a>
+5.  <a href="#crud">CRUD</a>
 
 
 
@@ -23,7 +23,7 @@ $ pip freeze > requirements.txt
 ---
 
 
-### 2. Databases: <a name="Databases"></a>
+### 2. Databases: <a name="databases"></a>
 
 1.
 
@@ -251,7 +251,7 @@ DATABASES = {
    ```
 
 
-### 4. Create OAuth: <a name="OAuth"></a>
+### 4. Create OAuth: <a name="oauth"></a>
 
 * [Tutorial 4: Authentication & Permissions](https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/)
 * [Authentication](https://www.django-rest-framework.org/api-guide/authentication/)
@@ -312,7 +312,7 @@ DATABASES = {
    ```
 
 
-### 5. CRUD <a name="CRUD"></a>
+### 5. CRUD <a name="crud"></a>
 Postman
 
 ----------------------------
