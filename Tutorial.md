@@ -470,6 +470,30 @@ csrftoken
     
     ```
 
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def setUp(self):
+           ... 
+            self.user = User.objects.create(username='test_username_Serializer')
+    
+            self.book_1 = Book.objects.create(name='Test book 1', price=500,
+                                              author_name='Author 1', description='',
+                                              owner=self.user)
+           ... 
+  
+        def test_ok(self):
+        ...
+        'owner': self.book_1.owner_id,
+        ...
+  
+     ```   
+
+
+
+
+
 * New test:
 
     ```
