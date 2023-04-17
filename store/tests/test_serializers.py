@@ -29,6 +29,7 @@ class BookSerializerTestCase(TestCase):
                 'author_name': 'Author 1',
                 'description': '',
                 'owner': self.book_1.owner_id,
+                'readers': [],
             },
             {
                 'id': self.book_2.id,
@@ -37,6 +38,7 @@ class BookSerializerTestCase(TestCase):
                 'author_name': 'Author 5',
                 'description': '',
                 'owner': self.book_1.owner_id,
+                'readers': [],
             },
             {
                 'id': self.book_3.id,
@@ -45,7 +47,13 @@ class BookSerializerTestCase(TestCase):
                 'author_name': 'Author 2',
                 'description': '',
                 'owner': self.book_1.owner_id,
+                'readers': [],
             },
 
         ]
+
+        # print()
+        # print(f"data => {data}")
+        # print(f"expected_data => {expected_data}")
+
         self.assertEqual(expected_data, data)

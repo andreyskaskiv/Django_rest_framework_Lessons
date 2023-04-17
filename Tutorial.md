@@ -13,6 +13,7 @@ $ pip freeze > requirements.txt
 4. Create <a href="#oauth">OAuth</a>
 5.  <a href="#crud">CRUD</a>
 6. Create <a href="#permissions">Permissions</a>
+7. Create <a href="#like">Like, Bookmarks, Rating </a>
 
 
 
@@ -491,9 +492,6 @@ csrftoken
      ```   
 
 
-
-
-
 * New test:
 
     ```
@@ -514,6 +512,114 @@ csrftoken
     ```
 
 
+### 7. Like, Bookmarks, Rating: <a name="like"></a>
+
+1. Create models:
+   ```
+   store -> models.py
+   
+   UserBookRelation
+   ```
+
+2. Models refactoring:
+   ```
+   store -> models.py
+   
+    class Book(models.Model):
+        ...
+        owner = models.ForeignKey(User, on_delete=models.SET_NULL,
+                              null=True, related_name='my_books')
+        readers = models.ManyToManyField(User, through='UserBookRelation',
+                                     related_name='books')
+   ```
+
+```
+python manage.py makemigrations
+python manage.py migrate
+``` 
+
+3. Registration in admin panel:
+   ```
+   store -> admin.py
+   
+   UserBookRelationAdmin
+   ```
+   
+4. `python manage.py shell_plus`
+
+    ```
+    >>> user = User.objects.last()
+    
+    >>> user.books.all()
+    <QuerySet [<Book: Id 17: Test book 3>]>
+    
+    >>> user.my_books.all()
+    <QuerySet [<Book: Id 16: Test book 2>]>
+    
+    
+    >>> user = User.objects.get(id=1)
+    
+    >>> user.books.all()
+    <QuerySet [<Book: Id 17: Test book 3>, <Book: Id 15: Test book 1>]>
+    
+    >>> user.my_books.all()
+    <QuerySet [<Book: Id 15: Test book 1>]>
+    ```
+   
+my_books = created  
+books = UserBookRelation (like/in_bookmarks/rate)
+
+
+5. Create serializers:  
+    id мы берем из self.request.user, поэтому не передаем в сериализоторе
+   ```
+   store -> serializers.py
+   
+   UserBookRelationSerializer
+   ```
+
+6. Create Views:  
+    `lookup_field = 'book'` создаем  для удобства, для фронта подменяя id релейшена на id книги, и реализуем через def get_object
+    ```
+    store -> views.py 
+    
+    class UserBooksRelationView(UpdateModelMixin, GenericViewSet):
+    ```
+
+7. Add url:  
+   ```
+   _django_rest_framework_lessons_ -> urls.py 
+
+   router.register(r'book_relation', UserBooksRelationView)
+
+   ```
+
+8. Create TestCase
+
+   ```pycon
+    python manage.py test
+   ```
+
+* addition test:
+
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def test_ok(self):
+        ...
+        'readers': [],
+        ...
+  
+     ```   
+  
+* New test:
+
+   ```
+   store/tests -> test_api.py
+   
+   BooksRelationTestCase
+   ```
 
 
 
