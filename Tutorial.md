@@ -11,9 +11,10 @@ $ pip freeze > requirements.txt
 2. Create <a href="#databases">Databases</a>
 3. Create <a href="#store">store</a>
 4. Create <a href="#oauth">OAuth</a>
-5.  <a href="#crud">CRUD</a>
+5. <a href="#crud">CRUD</a>
 6. Create <a href="#permissions">Permissions</a>
 7. Create <a href="#like">Like, Bookmarks, Rating </a>
+8. Create <a href="#annotation">Annotation and Aggregation </a>
 
 
 
@@ -622,8 +623,48 @@ books = UserBookRelation (like/in_bookmarks/rate)
    ```
 
 
+### 8. Create Annotation and Aggregation: <a name="annotation"></a>
 
+1. Serializers refactoring:
+    Создаем свое поле, но это поля создает еще дополнительный запрос в базу данных
+    на каждый объект (книгу), проблема n+1
+    self - это сам сериализатор, а instance - это то что мы сериализуем 
+   ```
+   store -> serializers.py
+   
+   class BooksSerializer(ModelSerializer):
+        likes_count = serializers.SerializerMethodField()
+        ...
+   
+        def get_likes_count(self, instance):
+            ...
+   ```
+2. addition test:
+    
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def setUp(self):
+        ...
+        user1 = 
+        user2 = 
+        user3 = 
+        ...
+  
+     ```  
 
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def test_ok(self):
+        ...
+        'readers': [2, 3, 4],
+        'likes_count': 3,
+        ...
+  
+     ```  
 
 
 
