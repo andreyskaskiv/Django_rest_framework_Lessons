@@ -639,7 +639,8 @@ books = UserBookRelation (like/in_bookmarks/rate)
         def get_likes_count(self, instance):
             ...
    ```
-2. addition test:
+   
+2. addition test_serializers:
     
     ```
     store/tests -> test_serializers.py
@@ -665,6 +666,143 @@ books = UserBookRelation (like/in_bookmarks/rate)
         ...
   
      ```  
+   
+3. Annotation, View refactoring:
+    Аннотируем каждую книгу, присваиваем вот этому полю annotated_likes количество (Count)
+    в случае (Case), когда (When) userbookrelation__like=True. И оно его сериализует через IntegerField
+
+    ```
+    store -> views.py 
+    
+    class BookViewSet(ModelViewSet):
+            queryset = Book.objects.all().annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+                rating=Avg('userbookrelation__rate')
+            ).order_by('id')
+               ...
+    ```
+4. Serializers refactoring:
+
+   ```
+   store -> serializers.py
+   
+   class BooksSerializer(ModelSerializer):
+        ...
+        annotated_likes = serializers.IntegerField(read_only=True)
+        rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
+
+        class Meta:
+            fields = ('id', 'name', 'price', 'author_name', 'description', 'owner', 'readers',
+                  'likes_count', 'annotated_likes', 'rating')
+
+   ```
+
+5. addition test_serializers:
+    
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def setUp(self):
+        ...
+        rate=
+        ...
+  
+     ```  
+
+    ```
+    store/tests -> test_serializers.py
+    
+    class BookSerializerTestCase(TestCase):
+        def test_ok(self):
+            books = Book.objects.all().annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+                rating=Avg('userbookrelation__rate')
+            ).order_by('id')
+   
+            ...
+            'annotated_likes': 3,
+            'rating': '4.67'
+            ...
+  
+     ```  
+
+6. addition test_api:
+
+    ```
+    store/tests -> test_api.py
+    
+    def setUp(self):
+       ... 
+       UserBookRelation.objects.create(user=self.user, book=self.book_1, like=True,
+                                        rate=5)
+       ... 
+    
+   
+    def test_01_get(self):
+       ... 
+       books = Book.objects.all().annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+            rating=Avg('userbookrelation__rate')
+        ).order_by('id')
+        serializer_data = BooksSerializer(books, many=True).data
+       ... 
+   
+        self.assertEqual(serializer_data[0]['rating'], '5.00')
+        self.assertEqual(serializer_data[0]['likes_count'], 1)
+        self.assertEqual(serializer_data[0]['annotated_likes'], 1)
+       ... 
+   
+
+   
+    def test_02_get_filter(self):
+       ... 
+       books = Book.objects.all().annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+            rating=Avg('userbookrelation__rate')
+        ).order_by('id')
+        serializer_data = BooksSerializer(books, many=True).data
+       ... 
+
+   
+   
+    def test_03_get_search(self):
+       ... 
+        books = Book.objects.filter(id__in=[self.book_1.id, self.book_3.id]).annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+            rating=Avg('userbookrelation__rate')
+        ).order_by('id')
+        serializer_data = BooksSerializer(books, many=True).data
+       ... 
+
+   
+    def test_04_get_ordering(self):
+       ... 
+        books = Book.objects.annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+            rating=Avg('userbookrelation__rate')
+        ).order_by('-price')
+        serializer_data = BooksSerializer(books, many=True).data
+       ... 
+ 
+   
+   
+    def test_08_get_id(self):
+       ... 
+        books = Book.objects.filter(id__in=[self.book_1.id]).annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+            rating=Avg('userbookrelation__rate')
+        ).order_by('id')
+        serializer_data = BooksSerializer(books, many=True).data
+       ...      
+   
+       self.assertEqual(serializer_data[0], response.data)
+   
+   
+    ```
+
+
+
 
 
 
