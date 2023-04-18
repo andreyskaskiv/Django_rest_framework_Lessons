@@ -10,9 +10,9 @@ class BookSerializerTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='test_username_Serializer')
 
-        user1 = User.objects.create(username='user1')
-        user2 = User.objects.create(username='user2')
-        user3 = User.objects.create(username='user3')
+        self.user1 = User.objects.create(username='user1')
+        self.user2 = User.objects.create(username='user2')
+        self.user3 = User.objects.create(username='user3')
 
         self.book_1 = Book.objects.create(name='Test book 1', price=500,
                                           author_name='Author 1', description='',
@@ -24,18 +24,18 @@ class BookSerializerTestCase(TestCase):
                                           author_name='Author 2', description='',
                                           owner=self.user)
 
-        UserBookRelation.objects.create(user=user1, book=self.book_1, like=True,
+        UserBookRelation.objects.create(user=self.user1, book=self.book_1, like=True,
                                         rate=5)
-        UserBookRelation.objects.create(user=user2, book=self.book_1, like=True,
+        UserBookRelation.objects.create(user=self.user2, book=self.book_1, like=True,
                                         rate=5)
-        UserBookRelation.objects.create(user=user3, book=self.book_1, like=True,
+        UserBookRelation.objects.create(user=self.user3, book=self.book_1, like=True,
                                         rate=4)
 
-        UserBookRelation.objects.create(user=user1, book=self.book_2, like=True,
+        UserBookRelation.objects.create(user=self.user1, book=self.book_2, like=True,
                                         rate=3)
-        UserBookRelation.objects.create(user=user2, book=self.book_2, like=True,
+        UserBookRelation.objects.create(user=self.user2, book=self.book_2, like=True,
                                         rate=4)
-        UserBookRelation.objects.create(user=user3, book=self.book_2, like=False)
+        UserBookRelation.objects.create(user=self.user3, book=self.book_2, like=False)
 
     def test_ok(self):
         books = Book.objects.all().annotate(
@@ -51,7 +51,7 @@ class BookSerializerTestCase(TestCase):
                 'author_name': 'Author 1',
                 'description': '',
                 'owner': self.book_1.owner_id,
-                'readers': [2, 3, 4],
+                'readers': [self.user1.id, self.user2.id, self.user3.id],
                 'likes_count': 3,
                 'annotated_likes': 3,
                 'rating': '4.67'
@@ -63,7 +63,7 @@ class BookSerializerTestCase(TestCase):
                 'author_name': 'Author 5',
                 'description': '',
                 'owner': self.book_1.owner_id,
-                'readers': [2, 3, 4],
+                'readers': [self.user1.id, self.user2.id, self.user3.id],
                 'likes_count': 2,
                 'annotated_likes': 2,
                 'rating': '3.50'
