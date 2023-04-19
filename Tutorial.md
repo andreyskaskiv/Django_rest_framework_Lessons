@@ -16,7 +16,7 @@ $ pip freeze > requirements.txt
 7. Create <a href="#like">Like, Bookmarks, Rating </a>
 8. Create <a href="#annotation">Annotation and Aggregation </a>
 9. Оптимизация SQL запросов в <a href="#orm">ORM</a>
-
+10. Caching <a href="#fields">fields</a>
 
 
 
@@ -994,13 +994,97 @@ python manage.py test
 ```
 
 
+### 10. Caching fields: <a name="fields"></a>
+
+Рейтинг будем пересчитывать только по событию лайка  
+Переносим рейтинг (rating) из class BookViewSet(ModelViewSet) в class Book(models.Model).
+
+1. Models refactoring:
+   ```
+   store -> models.py
+   
+    class Book(models.Model):
+        ...
+        rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+   ```
+
+2. migrate
+   ```
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+3. Create utils:
+
+    ```
+    store -> utils.py
+    
+    def set_rating(book):
+       ...
+    ```
+
+4. Create test_rating:
+
+   ```
+   store/tests -> test_rating.py
+    
+   class SetRatingTestCase(TestCase):
+      ...
+   ```
+   
+5. Models refactoring:
+    ```
+    store -> models.py
+    
+    class UserBookRelation(models.Model):
+         ...
+   
+        def __init__(self, *args, **kwargs):
+            super(UserBookRelation, self).__init__(*args, **kwargs)
+            self.old_rate = self.rate
+        
+        def save(self, *args, **kwargs):
+            creating = not self.pk
+        
+            super().save(*args, **kwargs)
+        
+            if self.old_rate != self.rate or creating:
+                from store.utils import set_rating
+                set_rating(self.book)
+    ```
+   
+6. test_serializers refactoring:
+
+   ```
+    class BookSerializerTestCase(TestCase):
+        def setUp(self):
+            user_book_3 = UserBookRelation.objects.create(user=self.user3, book=self.book_1, like=True)
+            user_book_3.rate = 4
+            user_book_3.save()
+   ```
+
+   ```
+    class BookSerializerTestCase(TestCase):
+        def test_ok(self):
+            books = Book.objects.all().annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
+            ).order_by('id')
+   ```
+
+7. test_api refactoring:
+
+   ```
+    class BookSerializerTestCase(TestCase):
+        def test_ok(self):
+            books = Book.objects.all().annotate(
+                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
+            ).order_by('id')
+   ```
 
 
-
-
-
-
-
+```
+python manage.py test
+```
 
 
 <a href="#top">UP</a>

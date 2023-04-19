@@ -11,11 +11,11 @@ class BookSerializerTestCase(TestCase):
         self.user = User.objects.create(username='test_username_Serializer')
 
         self.user1 = User.objects.create(username='user1',
-                                    first_name='Ivan', last_name='Petrov')
+                                         first_name='Ivan', last_name='Petrov')
         self.user2 = User.objects.create(username='user2',
-                                    first_name='Ivan', last_name='Sidorov')
+                                         first_name='Ivan', last_name='Sidorov')
         self.user3 = User.objects.create(username='user3',
-                                    first_name='1', last_name='2')
+                                         first_name='1', last_name='2')
 
         self.book_1 = Book.objects.create(name='Test book 1', price=500,
                                           author_name='Author 1', description='',
@@ -31,8 +31,9 @@ class BookSerializerTestCase(TestCase):
                                         rate=5)
         UserBookRelation.objects.create(user=self.user2, book=self.book_1, like=True,
                                         rate=5)
-        UserBookRelation.objects.create(user=self.user3, book=self.book_1, like=True,
-                                        rate=4)
+        user_book_3 = UserBookRelation.objects.create(user=self.user3, book=self.book_1, like=True)
+        user_book_3.rate = 4
+        user_book_3.save()
 
         UserBookRelation.objects.create(user=self.user1, book=self.book_2, like=True,
                                         rate=3)
@@ -40,10 +41,9 @@ class BookSerializerTestCase(TestCase):
                                         rate=4)
         UserBookRelation.objects.create(user=self.user3, book=self.book_2, like=False)
 
-    def test_ok(self):
+    def test_01_ok(self):
         books = Book.objects.all().annotate(
-            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
-            rating=Avg('userbookrelation__rate')
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
         ).order_by('id')
         data = BooksSerializer(books, many=True).data
         expected_data = [
@@ -55,9 +55,9 @@ class BookSerializerTestCase(TestCase):
                 'description': '',
                 'owner': self.book_1.owner_id,
                 'readers': [{
-                        'first_name': 'Ivan',
-                        'last_name': 'Petrov'
-                    },
+                    'first_name': 'Ivan',
+                    'last_name': 'Petrov'
+                },
                     {
                         'first_name': 'Ivan',
                         'last_name': 'Sidorov'
@@ -79,9 +79,9 @@ class BookSerializerTestCase(TestCase):
                 'description': '',
                 'owner': self.book_1.owner_id,
                 'readers': [{
-                        'first_name': 'Ivan',
-                        'last_name': 'Petrov'
-                    },
+                    'first_name': 'Ivan',
+                    'last_name': 'Petrov'
+                },
                     {
                         'first_name': 'Ivan',
                         'last_name': 'Sidorov'
@@ -109,7 +109,7 @@ class BookSerializerTestCase(TestCase):
             },
 
         ]
-        #
+
         # print()
         # print(f"data => {data}")
         # print()
