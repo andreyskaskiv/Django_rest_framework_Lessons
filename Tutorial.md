@@ -88,7 +88,7 @@ DATABASES = {
 
 
 
-### 2. app store: <a name="store"></a>
+### 3. app store: <a name="store"></a>
 
 1. Create app store
    ```
@@ -1008,13 +1008,23 @@ python manage.py test
         rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
    ```
 
-2. migrate
+2. View refactoring:
+    ```
+    store -> views.py
+    
+    class BookViewSet(ModelViewSet):
+        queryset = Book.objects.all().annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
+        ).select_related('owner').prefetch_related('readers').order_by('id')
+    ```
+
+3. migrate
    ```
    python manage.py makemigrations
    python manage.py migrate
    ```
 
-3. Create utils:
+4. Create utils:
 
     ```
     store -> utils.py
@@ -1023,7 +1033,7 @@ python manage.py test
        ...
     ```
 
-4. Create test_rating:
+5. Create test_rating:
 
    ```
    store/tests -> test_rating.py
@@ -1032,7 +1042,7 @@ python manage.py test
       ...
    ```
    
-5. Models refactoring:
+6. Models refactoring:
     ```
     store -> models.py
     
@@ -1053,7 +1063,7 @@ python manage.py test
                 set_rating(self.book)
     ```
    
-6. test_serializers refactoring:
+7. test_serializers refactoring:
 
    ```
     class BookSerializerTestCase(TestCase):
@@ -1071,15 +1081,18 @@ python manage.py test
             ).order_by('id')
    ```
 
-7. test_api refactoring:
+8. test_api refactoring:  
 
-   ```
-    class BookSerializerTestCase(TestCase):
-        def test_ok(self):
-            books = Book.objects.all().annotate(
-                annotated_likes=Count(Case(When(userbookrelation__like=True, then=1)))
-            ).order_by('id')
-   ```
+    Del `rating=Avg('userbookrelation__rate')`
+
+    ```
+    class BooksApiTestCase(TestCase):
+    
+        books = Book.objects.all().annotate(
+            annotated_likes=Count(Case(When(userbookrelation__like=True, then=1))),
+        ).order_by('id')
+    
+    ```
 
 
 ```

@@ -21,7 +21,7 @@ class BooksSerializer(ModelSerializer):
     class Meta:
         model = Book
         fields = ('id', 'name', 'price', 'author_name', 'description', 'owner', 'readers',
-                  'annotated_likes', 'rating', 'owner_name', 'readers')
+                  'annotated_likes', 'rating', 'owner_name')
 
 
 class UserBookRelationSerializer(ModelSerializer):
